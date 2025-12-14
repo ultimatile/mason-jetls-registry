@@ -9,10 +9,11 @@ return {
 		id = "pkg:mason/jetls",
 		---@param ctx InstallContext
 		install = function(ctx)
-			ctx.stdio_sink:stdout("Cloning JETLS.jl repository...\n")
+			ctx.stdio_sink:stdout("Cloning JETLS.jl repository (tag: 2025-12-12)...\n")
 			ctx.spawn.git({
 				"clone",
 				"--depth=1",
+				"--branch=2025-12-12",
 				"https://github.com/aviatesk/JETLS.jl.git",
 				".",
 			})
