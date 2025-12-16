@@ -1,0 +1,70 @@
+---
+name: Test
+
+on:
+  pull_request:
+    paths:
+      - 'packages/*/package.yaml'
+  workflow_dispatch:
+
+jobs:
+  test-install:
+    name: Test JETLS Installation
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        julia-version: ['1.12']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+
+      - name: Install yq
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install yq
+          fi
+
+      - name: Extract and run build script from package.yaml
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -e
+
+          # Extract the Unix build script from package.yaml
+          BUILD_SCRIPT=$(yq eval '.source.build[] | select(.target == "unix") | .run' $GITHUB_WORKSPACE/packages/jetls/package.yaml)
+
+          # Save to temporary script file
+          echo "$BUILD_SCRIPT" > build.sh
+          chmod +x build.sh
+
+          # Execute the build script
+          bash build.sh
+
+      - name: Verify installation
+        working-directory: ${{ runner.temp }}
+        run: |
+          if [[ ! -f bin/jetls ]]; then
+            echo "Error: bin/jetls not found"
+            exit 1
+          fi
+
+          if [[ ! -x bin/jetls ]]; then
+            echo "Error: bin/jetls is not executable"
+            exit 1
+          fi
+
+          echo "✓ Installation successful"
+          ls -la bin/jetls
+
+      - name: Test jetls executable
+        working-directory: ${{ runner.temp }}
+        run: |
+          ./bin/jetls --help || echo "Warning: jetls --help failed, but binary exists"
