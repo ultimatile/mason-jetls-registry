@@ -14,36 +14,21 @@ source:
   build:
     - target: unix
       run: |
-        julia --startup-file=no --project=. -e 'using Pkg; Pkg.instantiate()'
+        set -e
+        julia --startup-file=no -e 'using Pkg; Pkg.Apps.add(; url="https://github.com/aviatesk/JETLS.jl", rev="2025-12-12")'
+        APP_BIN="$(julia --startup-file=no -e 'using Pkg; println(joinpath(first(Base.DEPOT_PATH), "bin", "jetls"))')"
         mkdir -p bin
-        cat > bin/jetls << 'EOF'
-        #!/usr/bin/env sh
-        # Follow symlinks to find the real script location
-        SCRIPT="$0"
-        while [ -L "$SCRIPT" ]; do
-          SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT")" && pwd)"
-          SCRIPT="$(readlink "$SCRIPT")"
-          # If SCRIPT is relative, make it absolute
-          case "$SCRIPT" in
-            /*) ;;
-            *) SCRIPT="$SCRIPT_DIR/$SCRIPT" ;;
-          esac
-        done
-
-        SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT")" && pwd)"
-        PROJECT_DIR="$SCRIPT_DIR/.."
-
-        exec julia --startup-file=no --project="$PROJECT_DIR" -e 'using JETLS; JETLS.runserver(stdin, stdout)' "$@"
-        EOF
-        chmod +x bin/jetls
+        ln -sf "$APP_BIN" bin/jetls
     - target: win
       run: |
-        julia --startup-file=no --project=. -e 'using Pkg; Pkg.instantiate()'
+        setlocal enabledelayedexpansion
+        julia --startup-file=no -e "using Pkg; Pkg.Apps.add(; url=\"https://github.com/aviatesk/JETLS.jl\", rev=\"2025-12-12\")"
+        for /f "delims=" %%A in ('julia --startup-file=no -e "using Pkg; println(joinpath(first(Base.DEPOT_PATH), \"bin\", \"jetls.cmd\"))"') do set "APP_BIN=%%A"
         if not exist bin mkdir bin
-        (
+        > bin\jetls.cmd (
         echo @echo off
-        echo julia --startup-file=no --project=%%~dp0.. -e "using JETLS; JETLS.runserver(stdin, stdout)" %%*
-        ) > bin\jetls.cmd
+        echo "%APP_BIN%" %%*
+        )
 
 bin:
   jetls: bin/jetls
