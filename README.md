@@ -49,20 +49,13 @@ Alternatively, install from command line:
 
 ## How It Works
 
-The registry uses a standard YAML-based package definition with `build` instructions:
+The registry installs the prebuilt JETLS app via `Pkg.Apps`:
 
-1. Downloads JETLS.jl from GitHub (tag: 2025-12-12)
-2. Runs `julia --project=. -e 'using Pkg; Pkg.instantiate()'` to install dependencies
-3. Creates a platform-specific wrapper script:
-   - Unix: `bin/jetls` (shell script)
-   - Windows: `bin/jetls.cmd` (batch file)
-4. Makes the wrapper executable (Unix only)
+1. Runs `julia --startup-file=no -e 'using Pkg; Pkg.Apps.add(; url="https://github.com/aviatesk/JETLS.jl", rev="2025-12-12")'`.
+2. `Pkg.Apps` places the executable in `~/.julia/apps/bin/jetls` (or `jetls.cmd` on Windows).
+3. Mason links that executable into its own `bin/jetls`, so the app can run without a local project checkout.
 
-The wrapper script runs:
-
-```bash
-julia --startup-file=no --project=/path/to/JETLS.jl -e 'using JETLS; JETLS.runserver(stdin, stdout)'
-```
+Mason exposes `~/.local/share/nvim/mason/bin/jetls`, which simply forwards to the `Pkg.Apps` binary under `~/.julia/apps/bin/jetls`.
 
 ## LSP Configuration
 
