@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "labels": ["dependencies"],
+  "separateMinorPatch": false,
+  "prConcurrentLimit": 3,
+  "prCreation": "immediate",
+  "automerge": false,
+  "regexManagers": [
+    {
+      "fileMatch": ["^packages/.*/package\\.yaml$"],
+      "matchStrings": [
+        "url=\"https://github\\.com/(?<depName>[^\"]+)\",\\s*rev=\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^(?<version>.*)$"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": ["github-releases"],
+      "matchPackageNames": ["aviatesk/JETLS.jl"],
+      "commitMessageTopic": "JETLS.jl",
+      "commitMessageExtra": "to {{newValue}}",
+      "schedule": ["every weekend"]
+    }
+  ]
+}
