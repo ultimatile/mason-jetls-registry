@@ -1,6 +1,6 @@
 ---
 name: jetls
-description: JETLS.jl is a Julia Enhanced Type-aware Language Server that provides advanced static analysis and seamless integration with the Julia runtime.
+description: JETLS.jl is a Julia language server that provides advanced static analysis and seamless integration with the Julia runtime.
 homepage: https://github.com/aviatesk/JETLS.jl
 languages:
   - Julia
