@@ -12,6 +12,7 @@
     {
       "fileMatch": ["^packages/.*/package\\.yaml$"],
       "matchStrings": [
+        "id:\\s*pkg:github/(?<depName>[^@]+)@(?<currentValue>\\S+)",
         "url=\"https://github\\.com/(?<depName>[^\"]+)\",\\s*rev=\"(?<currentValue>[^\"]+)\""
       ],
       "datasourceTemplate": "github-releases",
