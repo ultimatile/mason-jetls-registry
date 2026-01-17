@@ -1,16 +1,21 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
-  "labels": ["dependencies"],
+  "labels": [
+    "dependencies"
+  ],
   "separateMinorPatch": false,
   "prConcurrentLimit": 3,
   "prCreation": "immediate",
   "automerge": false,
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": ["^packages/.*/package\\.yaml$"],
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^packages/.*/package\\.yaml$/"
+      ],
       "matchStrings": [
         "id:\\s*pkg:github/(?<depName>[^@]+)@(?<currentValue>\\S+)",
         "url=\"https://github\\.com/(?<depName>[^\"]+)\",\\s*rev=\"(?<currentValue>[^\"]+)\""
@@ -21,11 +26,17 @@
   ],
   "packageRules": [
     {
-      "matchDatasources": ["github-releases"],
-      "matchPackageNames": ["aviatesk/JETLS.jl"],
+      "matchDatasources": [
+        "github-releases"
+      ],
+      "matchPackageNames": [
+        "aviatesk/JETLS.jl"
+      ],
       "commitMessageTopic": "JETLS.jl",
       "commitMessageExtra": "to {{newValue}}",
-      "schedule": ["every weekend"]
+      "schedule": [
+        "every weekend"
+      ]
     }
   ]
 }
