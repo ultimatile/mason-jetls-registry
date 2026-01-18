@@ -51,7 +51,7 @@ Alternatively, install from command line:
 
 The registry installs the prebuilt JETLS app via `Pkg.Apps`:
 
-1. Runs `julia --startup-file=no -e 'using Pkg; Pkg.Apps.add(; url="https://github.com/aviatesk/JETLS.jl", rev="2025-12-12")'`.
+1. Runs `julia --startup-file=no -e 'using Pkg; Pkg.Apps.add(; url="https://github.com/aviatesk/JETLS.jl", rev="<version>")'`.
 2. `Pkg.Apps` places the executable in `~/.julia/bin/jetls` (or `jetls.cmd` on Windows).
 3. Mason links that executable into its own `bin/jetls`, so the app can run without a local project checkout.
 
@@ -154,7 +154,7 @@ After making changes to `packages/jetls/package.yaml`, restart Neovim and reinst
 
 The package is defined in `packages/jetls/package.yaml` using:
 
-- **Source**: `pkg:github/aviatesk/JETLS.jl@2025-12-12`
+- **Source**: `pkg:github/aviatesk/JETLS.jl@<version>`
 - **Build Instructions**: Platform-specific scripts for Unix and Windows
 - **Bin**: Wrapper script location
 
@@ -163,12 +163,14 @@ The package is defined in `packages/jetls/package.yaml` using:
 Releases are automatically created via GitHub Actions when `packages/jetls/package.yaml` is modified. The workflow:
 
 1. Detects changes to package definitions
-2. Generates a timestamped tag (e.g., `2025-12-14-adjective-noun`)
+2. Generates a timestamped tag (e.g., `2026-01-18-adjective-noun`)
 3. Compiles `package.yaml` to `registry.json`
 4. Creates a GitHub release with:
    - `registry.json`
    - `registry.json.zip`
    - `checksums.txt`
+
+> **Note**: The release workflow uses `mason-org/actions/registry-release`, which requires non-merge commits to detect changes. When merging PRs, use **Squash and merge** instead of regular merge to ensure releases are created correctly.
 
 ### Manual Release
 
@@ -179,6 +181,8 @@ gh workflow run release.yml
 ```
 
 Or via GitHub UI: Actions → Release → Run workflow
+
+> **Note**: Manual triggers will only create a release if the latest commit is a non-merge commit that modified `packages/`.
 
 ## References
 
