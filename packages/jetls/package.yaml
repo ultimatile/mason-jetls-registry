@@ -10,12 +10,12 @@ categories:
   - LSP
 
 source:
-  id: pkg:github/aviatesk/JETLS.jl@2026-01-17
+  id: pkg:github/aviatesk/JETLS.jl@2025-12-12
   build:
     - target: unix
       run: |
         set -e
-        julia --startup-file=no -e 'using Pkg; Pkg.Apps.add(; url="https://github.com/aviatesk/JETLS.jl", rev="2026-01-17")'
+        julia --startup-file=no -e 'using Pkg; Pkg.Apps.add(; url="https://github.com/aviatesk/JETLS.jl", rev="2025-12-12")'
         APP_BIN="$(julia --startup-file=no -e 'using Pkg; println(joinpath(first(Base.DEPOT_PATH), "bin", "jetls"))')"
         mkdir -p bin
         ln -sf "$APP_BIN" bin/jetls
