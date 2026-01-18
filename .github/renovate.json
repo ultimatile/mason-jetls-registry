@@ -21,7 +21,8 @@
         "url=\"https://github\\.com/(?<depName>[^\"]+)\",\\s*rev=\"(?<currentValue>[^\"]+)\""
       ],
       "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^(?<version>.*)$"
+      "extractVersionTemplate": "^(?<version>.*)$",
+      "versioningTemplate": "loose"
     }
   ],
   "packageRules": [
