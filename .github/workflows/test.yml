@@ -110,4 +110,5 @@ jobs:
       - name: Test jetls executable
         working-directory: ${{ runner.temp }}
         shell: cmd
-        run: bin\jetls.cmd --help || echo Warning: jetls --help failed, but binary exists
+        run: |
+          bin\jetls.cmd --help || echo Warning: jetls --help failed, but binary exists
