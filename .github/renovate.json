@@ -18,7 +18,7 @@
       ],
       "matchStrings": [
         "id:\\s*pkg:github/(?<depName>[^@]+)@(?<currentValue>\\S+)",
-        "url=\"https://github\\.com/(?<depName>[^\"]+)\",\\s*rev=\"(?<currentValue>[^\"]+)\""
+        "url=\\\\?\"https://github\\.com/(?<depName>[^\"\\\\]+)\\\\?\",\\s*rev=\\\\?\"(?<currentValue>[^\"\\\\]+)\\\\?\""
       ],
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^(?<version>.*)$",
