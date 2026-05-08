@@ -84,6 +84,10 @@ jobs:
         with:
           version: ${{ matrix.julia-version }}
 
+      - name: Install yq
+        shell: pwsh
+        run: choco install yq -y
+
       - name: Extract win build script from package.yaml
         working-directory: ${{ runner.temp }}
         shell: pwsh
