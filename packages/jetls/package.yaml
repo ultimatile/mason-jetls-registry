@@ -24,7 +24,7 @@ source:
       run: |
         setlocal enabledelayedexpansion
         julia --startup-file=no -e "using Pkg; Pkg.Apps.add(; url=\"https://github.com/aviatesk/JETLS.jl\", rev=\"2026-05-02\")"
-        for /f "delims=" %%A in ('julia --startup-file=no -e "using Pkg; println(joinpath(first(Base.DEPOT_PATH), \"bin\", \"jetls.cmd\"))"') do set "APP_BIN=%%A"
+        for /f "delims=" %%A in ('julia --startup-file=no -e "using Pkg; println(joinpath(first(Base.DEPOT_PATH), \"bin\", \"jetls.bat\"))"') do set "APP_BIN=%%A"
         if not exist bin mkdir bin
         > bin\jetls.cmd (
         echo @echo off
