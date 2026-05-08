@@ -68,3 +68,46 @@ jobs:
         working-directory: ${{ runner.temp }}
         run: |
           ./bin/jetls --help || echo "Warning: jetls --help failed, but binary exists"
+
+  test-install-windows:
+    name: Test JETLS Installation (Windows)
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        julia-version: ['1.12']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v3
+        with:
+          version: ${{ matrix.julia-version }}
+
+      - name: Extract win build script from package.yaml
+        working-directory: ${{ runner.temp }}
+        shell: pwsh
+        run: |
+          yq eval '.source.build[] | select(.target == "win") | .run' "$env:GITHUB_WORKSPACE/packages/jetls/package.yaml" |
+            Set-Content -Path build.cmd
+
+      - name: Run build script
+        working-directory: ${{ runner.temp }}
+        shell: cmd
+        run: build.cmd
+
+      - name: Verify installation
+        working-directory: ${{ runner.temp }}
+        shell: pwsh
+        run: |
+          if (-not (Test-Path bin/jetls.cmd)) {
+            Write-Error "bin/jetls.cmd not found"
+            exit 1
+          }
+          Write-Host "Installation successful"
+          Get-Item bin/jetls.cmd
+
+      - name: Test jetls executable
+        working-directory: ${{ runner.temp }}
+        shell: cmd
+        run: bin\jetls.cmd --help || echo Warning: jetls --help failed, but binary exists
