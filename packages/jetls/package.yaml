@@ -19,16 +19,18 @@ source:
         APP_BIN="$(julia --startup-file=no -e 'using Pkg; println(joinpath(first(Base.DEPOT_PATH), "bin", "jetls"))')"
         mkdir -p bin
         ln -sf "$APP_BIN" bin/jetls
+      bin: bin/jetls
     - target: win
       run: |
         setlocal enabledelayedexpansion
-        julia --startup-file=no -e "using Pkg; Pkg.Apps.add(; url=\"https://github.com/aviatesk/JETLS.jl\", rev=\"2025-12-12\")"
+        julia --startup-file=no -e "using Pkg; Pkg.Apps.add(; url=\"https://github.com/aviatesk/JETLS.jl\", rev=\"2026-05-02\")"
         for /f "delims=" %%A in ('julia --startup-file=no -e "using Pkg; println(joinpath(first(Base.DEPOT_PATH), \"bin\", \"jetls.cmd\"))"') do set "APP_BIN=%%A"
         if not exist bin mkdir bin
         > bin\jetls.cmd (
         echo @echo off
         echo "%APP_BIN%" %%*
         )
+      bin: bin/jetls.cmd
 
 bin:
-  jetls: bin/jetls
+  jetls: "{{source.build.bin}}"
