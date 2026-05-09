@@ -10,27 +10,17 @@ categories:
   - LSP
 
 source:
-  id: pkg:github/aviatesk/JETLS.jl@2026-05-02
-  build:
-    - target: unix
-      run: |
-        set -e
-        julia --startup-file=no -e 'using Pkg; Pkg.Apps.add(; url="https://github.com/aviatesk/JETLS.jl", rev="2026-05-02")'
-        APP_BIN="$(julia --startup-file=no -e 'using Pkg; println(joinpath(first(Base.DEPOT_PATH), "bin", "jetls"))')"
-        mkdir -p bin
-        ln -sf "$APP_BIN" bin/jetls
-      bin: bin/jetls
-    - target: win
-      run: |
-        setlocal enabledelayedexpansion
-        julia --startup-file=no -e "using Pkg; Pkg.Apps.add(; url=\"https://github.com/aviatesk/JETLS.jl\", rev=\"2026-05-02\")"
-        for /f "delims=" %%A in ('julia --startup-file=no -e "using Pkg; println(joinpath(first(Base.DEPOT_PATH), \"bin\", \"jetls.bat\"))"') do set "APP_BIN=%%A"
-        if not exist bin mkdir bin
-        > bin\jetls.cmd (
-        echo @echo off
-        echo "%APP_BIN%" %%*
-        )
-      bin: bin/jetls.cmd
+  id: pkg:github/ultimatile/jetls-sysimage@2026-05-06
+  asset:
+    - target: linux_x64
+      file: jetls-sysimage-{{version}}-linux-x64.zip:libexec/
+      bin: exec:libexec/bin/jetls
+    - target: darwin_arm64
+      file: jetls-sysimage-{{version}}-macos-arm64.zip:libexec/
+      bin: exec:libexec/bin/jetls
+    - target: win_x64
+      file: jetls-sysimage-{{version}}-win-x64.zip:libexec/
+      bin: libexec/bin/jetls.cmd
 
 bin:
-  jetls: "{{source.build.bin}}"
+  jetls: "{{source.asset.bin}}"

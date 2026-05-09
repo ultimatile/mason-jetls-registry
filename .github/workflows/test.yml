@@ -8,111 +8,66 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-install:
-    name: Test JETLS Installation
-    runs-on: ${{ matrix.os }}
+  test:
+    name: Test JETLS Installation (${{ matrix.tag }})
+    runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        julia-version: ['1.12']
+        include:
+          - runner: ubuntu-latest
+            tag: linux-x64
+            shim: bin/jetls
+          - runner: macos-latest
+            tag: macos-arm64
+            shim: bin/jetls
+          - runner: windows-latest
+            tag: win-x64
+            shim: bin/jetls.cmd
+    defaults:
+      run:
+        shell: bash
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Setup Julia
-        uses: julia-actions/setup-julia@v3
+      - uses: julia-actions/setup-julia@v3
         with:
-          version: ${{ matrix.julia-version }}
+          version: '1.12'
 
-      - name: Install yq
+      - name: Install yq (Linux)
+        if: matrix.runner == 'ubuntu-latest'
         run: |
-          if [[ "$RUNNER_OS" == "Linux" ]]; then
-            sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-            sudo chmod +x /usr/local/bin/yq
-          elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            brew install yq
-          fi
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
 
-      - name: Extract and run build script from package.yaml
-        working-directory: ${{ runner.temp }}
+      - name: Install yq (macOS)
+        if: matrix.runner == 'macos-latest'
+        run: brew install yq
+
+      - name: Install yq (Windows)
+        if: matrix.runner == 'windows-latest'
+        shell: pwsh
+        run: choco install yq -y --no-progress
+
+      - name: Download and extract asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLATFORM_TAG: ${{ matrix.tag }}
+          STAGE: ${{ runner.temp }}/jetls
         run: |
-          set -e
-
-          # Extract the Unix build script from package.yaml
-          BUILD_SCRIPT=$(yq eval '.source.build[] | select(.target == "unix") | .run' $GITHUB_WORKSPACE/packages/jetls/package.yaml)
-
-          # Save to temporary script file
-          echo "$BUILD_SCRIPT" > build.sh
-          chmod +x build.sh
-
-          # Execute the build script
-          bash build.sh
-
-      - name: Verify installation
-        working-directory: ${{ runner.temp }}
-        run: |
-          if [[ ! -f bin/jetls ]]; then
-            echo "Error: bin/jetls not found"
-            exit 1
-          fi
-
-          if [[ ! -x bin/jetls ]]; then
-            echo "Error: bin/jetls is not executable"
-            exit 1
-          fi
-
-          echo "✓ Installation successful"
-          ls -la bin/jetls
+          set -eu
+          ID=$(yq '.source.id' packages/jetls/package.yaml)
+          REST=${ID#pkg:github/}
+          REPO=${REST%@*}
+          VERSION=${REST#*@}
+          ASSET="jetls-sysimage-${VERSION}-${PLATFORM_TAG}.zip"
+          mkdir -p "$STAGE"
+          gh release download "$VERSION" --repo "$REPO" --pattern "$ASSET" --dir "$STAGE"
+          (cd "$STAGE" && unzip -q "$ASSET")
 
       - name: Test jetls executable
-        working-directory: ${{ runner.temp }}
+        env:
+          STAGE: ${{ runner.temp }}/jetls
+          SHIM: ${{ matrix.shim }}
         run: |
-          ./bin/jetls --help || echo "Warning: jetls --help failed, but binary exists"
-
-  test-install-windows:
-    name: Test JETLS Installation (Windows)
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        julia-version: ['1.12']
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup Julia
-        uses: julia-actions/setup-julia@v3
-        with:
-          version: ${{ matrix.julia-version }}
-
-      - name: Install yq
-        shell: pwsh
-        run: choco install yq -y
-
-      - name: Extract win build script from package.yaml
-        working-directory: ${{ runner.temp }}
-        shell: pwsh
-        run: |
-          yq eval '.source.build[] | select(.target == "win") | .run' "$env:GITHUB_WORKSPACE/packages/jetls/package.yaml" |
-            Set-Content -Path build.cmd
-
-      - name: Run build script
-        working-directory: ${{ runner.temp }}
-        shell: cmd
-        run: build.cmd
-
-      - name: Verify installation
-        working-directory: ${{ runner.temp }}
-        shell: pwsh
-        run: |
-          if (-not (Test-Path bin/jetls.cmd)) {
-            Write-Error "bin/jetls.cmd not found"
-            exit 1
-          }
-          Write-Host "Installation successful"
-          Get-Item bin/jetls.cmd
-
-      - name: Test jetls executable
-        working-directory: ${{ runner.temp }}
-        shell: cmd
-        run: |
-          bin\jetls.cmd --help || echo Warning: jetls --help failed, but binary exists
+          "$STAGE/$SHIM" --version

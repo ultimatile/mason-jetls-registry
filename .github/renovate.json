@@ -17,8 +17,7 @@
         "/^packages/.*/package\\.yaml$/"
       ],
       "matchStrings": [
-        "id:\\s*pkg:github/(?<depName>[^@]+)@(?<currentValue>\\S+)",
-        "url=\\\\?\"https://github\\.com/(?<depName>[^\"\\\\]+)\\\\?\",\\s*rev=\\\\?\"(?<currentValue>[^\"\\\\]+)\\\\?\""
+        "id:\\s*pkg:github/(?<depName>[^@]+)@(?<currentValue>\\S+)"
       ],
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^(?<version>.*)$",
@@ -31,13 +30,10 @@
         "github-releases"
       ],
       "matchPackageNames": [
-        "aviatesk/JETLS.jl"
+        "ultimatile/jetls-sysimage"
       ],
-      "commitMessageTopic": "JETLS.jl",
-      "commitMessageExtra": "to {{newValue}}",
-      "schedule": [
-        "every weekend"
-      ]
+      "commitMessageTopic": "jetls-sysimage",
+      "commitMessageExtra": "to {{newValue}}"
     }
   ]
 }
