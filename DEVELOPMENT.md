@@ -37,7 +37,7 @@ The `<version>` in `source.id` (`pkg:github/ultimatile/jetls-sysimage@<version>`
 
 ## Continuous testing
 
-`.github/workflows/test.yml` runs on every PR that touches `packages/*/package.yaml`. It downloads the sysimage zip referenced by `source.id` on Linux, macOS, and Windows runners and asserts that the bundled shim responds to `--version`.
+`.github/workflows/test.yml` runs on every PR that touches `packages/*/package.yaml` or the workflow file itself. It downloads the sysimage zip referenced by `source.id` on Linux, macOS, and Windows runners and asserts that the bundled shim responds to `--version`.
 
 ## Automated releases
 

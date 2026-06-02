@@ -5,6 +5,9 @@ on:
   pull_request:
     paths:
       - 'packages/*/package.yaml'
+      # Also run when the workflow itself changes, so edits to the download
+      # and validation logic are exercised end-to-end before they land.
+      - '.github/workflows/test.yml'
   workflow_dispatch:
 
 jobs:
