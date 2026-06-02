@@ -60,9 +60,30 @@ jobs:
           REST=${ID#pkg:github/}
           REPO=${REST%@*}
           VERSION=${REST#*@}
+          # Pin the upstream repo: this registry only ever consumes the single
+          # jetls-sysimage source, so a PR may bump @version but must not redirect
+          # the download elsewhere. Without this a fork PR could point source.id at
+          # an attacker-controlled repo, and the asset below would be downloaded and
+          # executed via the shim on the runner. The parsed $REPO is only used to
+          # assert the manifest matches; the download itself uses the trusted
+          # constant so the validated value is the value used (no check/use gap).
+          EXPECTED_REPO="ultimatile/jetls-sysimage"
+          if [ "$REPO" != "$EXPECTED_REPO" ]; then
+            echo "Refusing to download from unexpected repo: $REPO (expected $EXPECTED_REPO)" >&2
+            exit 1
+          fi
+          # Validate the tag shape at the source: reject empty, leading-dash, or
+          # any value outside [A-Za-z0-9._-]. Defense in depth on top of quoting
+          # and the repo pin, so the parsed value can never be re-interpreted as a
+          # gh flag or smuggle special characters into the asset name below.
+          case "$VERSION" in
+            ''|-*|*[!A-Za-z0-9._-]*)
+              echo "Refusing unexpected version tag: $VERSION" >&2
+              exit 1 ;;
+          esac
           ASSET="jetls-sysimage-${VERSION}-${PLATFORM_TAG}.zip"
           mkdir -p "$STAGE"
-          gh release download "$VERSION" --repo "$REPO" --pattern "$ASSET" --dir "$STAGE"
+          gh release download "$VERSION" --repo "$EXPECTED_REPO" --pattern "$ASSET" --dir "$STAGE"
           (cd "$STAGE" && unzip -q "$ASSET")
 
       - name: Test jetls executable
