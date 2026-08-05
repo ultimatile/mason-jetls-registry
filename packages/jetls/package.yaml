@@ -10,7 +10,7 @@ categories:
   - LSP
 
 source:
-  id: pkg:github/ultimatile/jetls-sysimage@2026-08-01
+  id: pkg:github/ultimatile/jetls-sysimage@2026-08-02
   asset:
     - target: linux_x64
       file: jetls-sysimage-{{version}}-linux-x64.zip:libexec/
