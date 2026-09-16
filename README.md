@@ -6,7 +6,7 @@ The package installs a pre-built sysimage of JETLS.jl from [`ultimatile/jetls-sy
 
 ## Prerequisites
 
-- Julia 1.12 (the sysimage is built against 1.12 and will not load on other Julia versions)
+- Julia 1.13 (the sysimage is built against 1.13 and will not load on other Julia versions)
 - Neovim with Mason installed
 
 ## Installation
