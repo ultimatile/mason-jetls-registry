@@ -35,7 +35,7 @@ jobs:
 
       - uses: julia-actions/setup-julia@v3
         with:
-          version: '1.12'
+          version: '1.13'
 
       - name: Install yq (Linux)
         if: matrix.runner == 'ubuntu-latest'
