@@ -34,17 +34,6 @@
       ],
       "commitMessageTopic": "jetls-sysimage",
       "commitMessageExtra": "to {{newValue}}"
-    },
-    {
-      "description": [
-        "test.yml's Julia is not an independent dependency: it runs the downloaded sysimage through the shim, and a sysimage links against libjulia.<major>.<minor>, so this must track the Julia that built the asset in ultimatile/jetls-sysimage. Patch releases are interchangeable, minor releases are not.",
-        "Renovate's built-in julia-actions/setup-julia rule sets no extractVersion, so the raw tag (`v1.13.0`) would land here and pin a patch level that setup-julia resolves at run time. Capturing major.minor keeps this in step with the sysimage side, which is also specified as major.minor.",
-        "The trailing `\\.\\d+$` is what excludes prereleases: `v1.13.0-rc4` must not match, or it would be rewritten to a stable-looking `1.13` (non-matching releases are dropped, not passed through)."
-      ],
-      "matchDepNames": [
-        "julia"
-      ],
-      "extractVersion": "^v(?<version>\\d+\\.\\d+)\\.\\d+$"
     }
   ]
 }
