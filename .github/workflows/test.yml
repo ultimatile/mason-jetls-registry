@@ -33,10 +33,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: julia-actions/setup-julia@v3
-        with:
-          version: '1.13'
-
       - name: Install yq (Linux)
         if: matrix.runner == 'ubuntu-latest'
         run: |
@@ -88,6 +84,41 @@ jobs:
           mkdir -p "$STAGE"
           gh release download "$VERSION" --repo "$EXPECTED_REPO" --pattern "$ASSET" --dir "$STAGE"
           (cd "$STAGE" && unzip -q "$ASSET")
+
+      - name: Read the Julia the sysimage was built with
+        id: julia
+        # A sysimage links against libjulia.<major>.<minor> and will not load on
+        # anything else, so the Julia to install here is a property of the asset,
+        # not an independent choice. jetls-sysimage records it in the zip; reading
+        # it removes the second, hand-maintained statement of the same fact that
+        # used to sit in this workflow and go stale whenever the build moved.
+        env:
+          STAGE: ${{ runner.temp }}/jetls
+        run: |
+          set -eu
+          FILE="$STAGE/share/jetls/JULIA_VERSION"
+          # Fail closed. Assets published before jetls-sysimage recorded this
+          # cannot be tested here: nothing else in the zip states which Julia
+          # loads the sysimage, so guessing one would only turn a clear failure
+          # into a confusing one.
+          if [ ! -f "$FILE" ]; then
+            echo "Asset has no share/jetls/JULIA_VERSION; it predates the recorded build Julia" >&2
+            exit 1
+          fi
+          # Accept only a concrete release, in the same spirit as the tag check
+          # above: setup-julia's version input also takes selectors such as
+          # `nightly`, so an unexpected value would silently resolve to some
+          # other Julia instead of failing here.
+          JULIA_VERSION=$(cat "$FILE")
+          if [[ ! "$JULIA_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Refusing unexpected Julia version: $JULIA_VERSION" >&2
+            exit 1
+          fi
+          echo "version=$JULIA_VERSION" >> "$GITHUB_OUTPUT"
+
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: ${{ steps.julia.outputs.version }}
 
       - name: Test jetls executable
         env:
